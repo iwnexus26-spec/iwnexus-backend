@@ -11,6 +11,8 @@ app.get('/', (req,res)=>{
 *{box-sizing:border-box;margin:0;padding:0} html,body{background:#05070f;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;min-height:100vh;overflow-x:hidden}
 body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(800px at 20% 0%, rgba(250,204,21,0.18), transparent 60%), radial-gradient(600px at 90% 80%, rgba(34,197,94,0.15), transparent 60%), radial-gradient(500px at 50% 50%, rgba(139,92,246,0.12), transparent);pointer-events:none;z-index:0;animation:bgMove 10s ease-in-out infinite alternate}
 @keyframes bgMove{0%{transform:scale(1) translate(0,0)}100%{transform:scale(1.1) translate(-20px,10px)}}
+.hex-grid{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.05;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='122' viewBox='0 0 140 122'%3E%3Cpath d='M70 0 L140 31 L140 91 L70 122 L0 91 L0 31 Z' fill='none' stroke='%2364758b' stroke-width='1.2'/%3E%3C/svg%3E");background-size:140px 122px;background-position:0 0}
+.subtle-dots{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.03;background-image:radial-gradient(rgba(255,255,255,0.8) 1px, transparent 1px);background-size:24px 24px}
 .bees{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:hidden} .bee{position:absolute;font-size:20px;animation:flyBee linear infinite}
 @keyframes flyBee{0%{transform:translateX(-50px) translateY(0) rotate(0deg)}25%{transform:translateX(25vw) translateY(-20px) rotate(10deg)}50%{transform:translateX(50vw) translateY(10px) rotate(-10deg)}75%{transform:translateX(75vw) translateY(-10px) rotate(5deg)}100%{transform:translateX(110vw) translateY(0) rotate(0deg)}}
 .header{position:relative;z-index:2;padding:18px;text-align:center}
@@ -46,9 +48,15 @@ body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;backg
 .txt{margin-top:5px;line-height:1.1;letter-spacing:1px;text-shadow:0 1px 0 rgba(255,255,255,0.3)}
 .status{margin-top:16px;padding:10px 16px;background:rgba(15,23,42,0.8);border:1px solid rgba(255,255,255,0.07);border-radius:100px;display:inline-flex;align-items:center;gap:8px;font-size:11px;color:#94a3b8} .dot{width:8px;height:8px;border-radius:50%;background:#ef4444;box-shadow:0 0 10px #ef4444;animation:blink 1s infinite} .dot.on{background:#22c55e;box-shadow:0 0 12px #22c55e}
 .coin{position:fixed;pointer-events:none;font-weight:900;font-size:16px;color:#facc15;z-index:9999;animation:coinFly 1.3s ease-out forwards; text-shadow:0 2px 8px rgba(0,0,0,0.8)} @keyframes coinFly{0%{transform:translateY(0) scale(0.5) rotate(0deg);opacity:1}20%{transform:translateY(-20px) scale(1.2) rotate(10deg);opacity:1}100%{transform:translateY(-120px) scale(1.5) rotate(-10deg);opacity:0}}
-.confetti{position:fixed;width:8px;height:8px;pointer-events:none;z-index:9998;animation:confFall 1.5s ease-out forwards} @keyframes confFall{0%{transform:translateY(-20px) rotate(0deg) scale(1);opacity:1}100%{transform:translateY(100vh) rotate(720deg) scale(0);opacity:0}}
+.confetti{position:fixed;width:8px;height:8px;pointer-events:none;z-index:9998;animation:confFall 1.5s ease-out forwards} .device-bar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;background:rgba(15,23,42,0.9);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:12px 8px;margin-top:16px;position:relative;overflow:hidden}
+.device-bar::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(250,204,21,0.3),transparent)}
+.d-item{text-align:center;border-right:1px solid rgba(255,255,255,0.06);padding:0 6px}.d-item:last-child{border-right:none}
+.d-item .d-label{font-size:8px;color:#64748b;letter-spacing:0.5px;text-transform:uppercase;font-weight:700;display:block;margin-bottom:3px}
+.d-item .d-value{font-size:12px;font-weight:800;color:#fff;display:block}.d-item .d-value.green{color:#22c55e}.d-item .d-value.yellow{color:#facc15}
+.d-dot{width:6px;height:6px;background:#22c55e;border-radius:50%;display:inline-block;margin-right:4px;box-shadow:0 0 6px #22c55e;animation:blink 1.5s infinite}
+@keyframes confFall{0%{transform:translateY(-20px) rotate(0deg) scale(1);opacity:1}100%{transform:translateY(100vh) rotate(720deg) scale(0);opacity:0}}
 </style></head><body>
-<div class="bees" id="bees"></div>
+<div class="hex-grid"></div><div class="subtle-dots"></div><div class="bees" id="bees"></div>
 <div class="header"><div class="logo"><span>🐝</span> iwnexus BEE</div><div class="sub">✦ Zero Start • Tap To Wifi • Earn Real ✦</div></div>
 <div class="container">
 <div class="card" id="auth">
@@ -65,18 +73,23 @@ body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;backg
 <div class="stats"><div class="sbox live"><b id="gb">0.000</b><span>GB Shared</span></div><div class="sbox"><b id="bal">$0.00</b><span>Balance</span></div><div class="sbox"><b id="stat">OFF</b><span>Status</span></div></div>
 <div class="wifi-area"><div class="ring"></div><div class="ring r2"></div><div class="ring r3"></div><button class="big" id="btn" onclick="toggleWifi()"><span class="ico" id="ico">📡</span><span class="txt" id="txt">TAP TO<br>WIFI</span></button></div>
 <div class="status"><div class="dot" id="dot"></div><span id="hint">Ready to connect • Tap to start earning</span></div>
+<div class="device-bar">
+<div class="d-item"><span class="d-label">Online</span><span class="d-value" id="onlineTime">00:00:00</span></div>
+<div class="d-item"><span class="d-label">Connected Devices</span><span class="d-value yellow" id="connDevices">1</span></div>
+<div class="d-item"><span class="d-label">Status</span><span class="d-value green"><span class="d-dot"></span><span id="devStatus">Active</span></span></div>
+</div>
 <div style="margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:9px"><button class="btn btn-y" style="font-size:12px" onclick="withdraw()">💸 WITHDRAW</button><button style="background:rgba(255,255,255,0.06);color:#94a3b8;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:13px;font-size:12px;font-weight:800" onclick="bonus()">🎁 BONUS</button></div>
 <button style="background:none;color:#475569;font-size:11px;padding:8px;margin-top:8px;width:100%;border:none;cursor:pointer" onclick="logout()">↳ Logout</button>
 </div>
 </div>
 </div>
 <script>
-let myData=JSON.parse(localStorage.getItem("bee")||"null");let it=null;let wifi=false;
+let myData=JSON.parse(localStorage.getItem("bee")||"null");let it=null;let wifi=false;let onlineSec=0;let onlineTimer=null;
 function createBees(){const b=document.getElementById("bees");for(let i=0;i<6;i++){const e=document.createElement("div");e.className="bee";e.innerText="🐝";e.style.top=(10+Math.random()*80)+"%";e.style.animationDuration=(8+Math.random()*10)+"s";e.style.animationDelay=(Math.random()*5)+"s";e.style.fontSize=(14+Math.random()*10)+"px";b.appendChild(e)}}
 createBees();
 function tab(t){document.getElementById("fS").classList.toggle("hidden",t!='s');document.getElementById("fL").classList.toggle("hidden",t!='l');document.getElementById("tS").classList.toggle("on",t=='s');document.getElementById("tL").classList.toggle("on",t=='l')}
 function show(u){document.getElementById("auth").classList.add("hidden");document.getElementById("wifi").classList.remove("hidden");document.getElementById("uName").innerText=(u.name||"User").split(" ")[0];upd(u)}
-function upd(u){document.getElementById("gb").innerText=(u.gb||0).toFixed(3);document.getElementById("bal").innerText="$"+(u.balance||0).toFixed(2)}
+function upd(u){document.getElementById("gb").innerText=(u.gb||0).toFixed(3);document.getElementById("bal").innerText="$"+(u.balance||0).toFixed(2)} function formatTime(s){const h=String(Math.floor(s/3600)).padStart(2,'0');const m=String(Math.floor((s%3600)/60)).padStart(2,'0');const sec=String(s%60).padStart(2,'0');return `${h}:${m}:${sec}`} function startOnlineTimer(){if(onlineTimer) clearInterval(onlineTimer); onlineTimer=setInterval(()=>{onlineSec++;document.getElementById("onlineTime").innerText=formatTime(onlineSec);},1000)} function stopOnlineTimer(){if(onlineTimer) clearInterval(onlineTimer)}
 function coins(){const msgs=["+$0.01 💰","+0.004 GB ⚡","+$0.0006 💵","🔥 +GB"];const c=document.createElement("div");c.className="coin";c.innerText=msgs[Math.floor(Math.random()*msgs.length)];c.style.left=(35+Math.random()*30)+"%";c.style.top="52%";document.body.appendChild(c);setTimeout(()=>c.remove(),1300)}
 function confettiBurst(){const colors=["#facc15","#22c55e","#8b5cf6","#ec4899","#06b6d4"];for(let i=0;i<18;i++){const d=document.createElement("div");d.className="confetti";d.style.left=(40+Math.random()*20)+"%";d.style.top="45%";d.style.background=colors[Math.floor(Math.random()*colors.length)];d.style.borderRadius=Math.random()>0.5?"50%":"2px";d.style.animationDelay=(Math.random()*0.3)+"s";d.style.animationDuration=(0.8+Math.random()*0.8)+"s";d.animate([{transform:\`translate(0,0) rotate(0deg)\`,opacity:1},{transform:\`translate(\${(Math.random()-0.5)*300}px,\${window.innerHeight}px) rotate(\${Math.random()*720}deg)\`,opacity:0}],{duration:1200+Math.random()*800,easing:"cubic-bezier(0.25,0.46,0.45,0.94)"}).onfinish=()=>d.remove();document.body.appendChild(d)}}
 if(myData){show(myData)}
@@ -91,12 +104,12 @@ function toggleWifi(){
    i.animate([{transform:"scale(0) rotate(-180deg)"},{transform:"scale(1.5) rotate(15deg)"},{transform:"scale(1) rotate(0)"}],{duration:600});
    document.querySelectorAll(".ring").forEach(r=>{r.style.animationDuration="1s";});
    g.animate([{transform:"scale(1.3)",color:"#22c55e"},{transform:"scale(1)",color:"#facc15"}],{duration:400});
-   it=setInterval(()=>{earn();coins()},8000); earn(); coins(); confettiBurst();
+   it=setInterval(()=>{earn();coins()},8000); earn(); coins(); confettiBurst(); startOnlineTimer(); document.getElementById("devStatus").innerText="Active"; document.getElementById("connDevices").innerText="1";
    if(navigator.vibrate)navigator.vibrate([60,40,80]);
  }else{
    wifi=false; b.classList.remove("on"); i.innerText="📡"; t.innerHTML="TAP TO<br>WIFI"; s.innerText="OFF"; s.style.color=""; d.classList.remove("on"); h.innerText="Paused • Tap to resume";
    document.querySelectorAll(".ring").forEach(r=>{r.style.animationDuration="2s";});
-   clearInterval(it);
+   clearInterval(it); stopOnlineTimer(); document.getElementById("devStatus").innerText="Paused";
    if(navigator.vibrate)navigator.vibrate(20);
  }
 }
